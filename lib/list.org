@@ -1,0 +1,3 @@
+* create simple Backbone app. [0/2]
+- [ ] create model and view and show on a page.
+- [ ] added Backbone validation and button which set and validate new value.

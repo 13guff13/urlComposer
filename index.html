@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>urlComposer</title>
+  <script type="text/javascript" src="lib/require.js"></script>
+  <script type="text/javascript" src="require-config.js"></script>
+  <script type="text/javascript">
+    require(['jquery', 'test'], function ($, app) {
+    debugger;
+    $(function () {
+    app($('#area'));
+    });
+    });
+  </script>
+</head>
+<body>
+<style type="text/css" media="screen">
+  .error {
+     border: solid 1px #ff0000;
+  }
+</style>
+  <textarea id="area" cols="30" name="urls" rows="10"></textarea>
+  
+</body>
+</html>
