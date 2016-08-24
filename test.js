@@ -87,25 +87,6 @@ define([
          });
 
          return _.isEqual(urlUtmModel.getUrlUtmString(), urlUtmModelString);
-       },
-/* integration tests */
-
-       function () {
-         var urlCollection = new UrlCollection();
-         urlCollection.add(collectionUrlList);
-         var utmCollection = new UtmCollection();
-         utmCollection.add(utmLinkCollection);
-         var urlUtmModel = new UrlUtmModel({
-           urlCollection: urlCollection,
-           utmCollection: utmCollection
-         });
-
-         return _.isEqual(urlUtmModel.getUrlUtmString(), urlUtmModelString);
-       },
-
-       function () {
-         
-debugger;
        }
      ];
 
@@ -131,7 +112,6 @@ debugger;
      runTests();
 
      return function ($el) {
-       debugger;
        var urlModel = new UrlModel();
 
        var url = new UrlModelView({
