@@ -2,90 +2,139 @@ define([
   "jquery",
   "underscore",
   "backbone",
-  "tpl!template",
-  "backboneValidation"
-], function($, _, Backbone, template) {
+  "app/urlModel",
+  "app/urlModelView",
+  "app/urlCollection",
+  "app/utmModel",
+  "app/utmCollection",
+  'app/urlUtmModel'
+], function(
+     $,
+     _,
+     Backbone,
+     UrlModel,
+     UrlModelView,
+     UrlCollection,
+     UtmModel,
+     UtmCollection,
+     UrlUtmModel
+   ) {
      'use strict';
+
+     var modelStringUrl = 'http://ya.ru/\n';
+
+     var utmLinkCollection = [
+       {key: 'jopa', value: 'haaah'},
+       {key: 'nine', value: 'gag'},
+       {key: 'place', value: 'home'}
+     ];
+
+     
+     var collectionStringUrl = 'http://ya.ru/  \n'
+                             + '   http://sf.com/\n'
+                             + 'http://ssfsdf.fi/\n';
+     var collectionUrlList = [{url: 'http://ya.ru/'},
+                              {url: 'http://sf.com/'},
+                              {url: 'http://ssfsdf.fi/'}];
+
+     var urlUtmModelString = 'http://ya.ru/?jopa=haaah&nine=gag&place=home\n'
+                           + 'http://sf.com/?jopa=haaah&nine=gag&place=home\n'
+                           + 'http://ssfsdf.fi/?jopa=haaah&nine=gag&place=home';
+     var tests = [
+       function () {
+         var urlModel = new UrlModel();
+         urlModel.set('url', 'http://ya.ru/');
+         
+         return urlModel.isValid();
+       },
+       function  () {
+         var urlModel = new UrlModel();
+         urlModel.set('url', 'http:/&/ya.ru/');
+         
+         return !urlModel.isValid();
+       },
+       function () {
+         var urlCollection = new UrlCollection();
+
+         return _.isEqual(urlCollection.stringToList(collectionStringUrl), collectionUrlList);
+       },
+       function () {
+         var urlCollection = new UrlCollection();
+
+         return _.isEqual(urlCollection.stringToList(''), []);
+       },
+       function () {
+         var utmModel = new UtmModel();
+         utmModel.set({key: 'jopa', value: 'haaah'});
+         
+         return _.isEqual(utmModel.getUtmString(), 'jopa=haaah');
+       },
+       function () {
+         var utmLinkStringCollection = '?jopa=haaah&nine=gag&place=home';
+         var utmCollection = new UtmCollection();
+         utmCollection.add(utmLinkCollection);
+         
+         return _.isEqual(utmCollection.getUtmString(), utmLinkStringCollection);
+       },
+       function () {
+         var urlCollection = new UrlCollection();
+         urlCollection.add(collectionUrlList);
+         var utmCollection = new UtmCollection();
+         utmCollection.add(utmLinkCollection);
+         var urlUtmModel = new UrlUtmModel({
+           urlCollection: urlCollection,
+           utmCollection: utmCollection
+         });
+
+         return _.isEqual(urlUtmModel.getUrlUtmString(), urlUtmModelString);
+       },
+/* integration tests */
+
+       function () {
+         var urlCollection = new UrlCollection();
+         urlCollection.add(collectionUrlList);
+         var utmCollection = new UtmCollection();
+         utmCollection.add(utmLinkCollection);
+         var urlUtmModel = new UrlUtmModel({
+           urlCollection: urlCollection,
+           utmCollection: utmCollection
+         });
+
+         return _.isEqual(urlUtmModel.getUrlUtmString(), urlUtmModelString);
+       },
+
+       function () {
+         
 debugger;
+       }
+     ];
+
+     function runTests () {
+       var failTestList = _.filter(
+         tests,
+         function (test) {
+           var done = false;
+
+           done = test();
+           
+           return !done;
+         });
+
+       if (failTestList.length > 0) {
+         console.log('!!!!!! fail ' + failTestList.length + ' test.');
+         console.log(failTestList.toString());
+       } else {
+         console.log('!!!!!! DONE all tests.');
+       }
+     }
+
+     runTests();
 
      return function ($el) {
-       _.extend(Backbone.Validation.callbacks, {
-         valid: function (view, attr, selector) {
-debugger;
-         },
-         invalid: function (view, attr, error, selector) {
-debugger;
-         }
-       });
-
-       var UrlModel = Backbone.Model.extend({
-         defaults: {
-           url: ''
-         },
-//         initialize: function (options) {
-  //       },
-         validation: {
-           url: {
-             required: true,
-             pattern: 'url',
-             msg: 'Please enter a valid url.'
-           }
-         },
-         validate: function (attrs, options) {
-           var urlRegexp = /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
-           if (!urlRegexp.test(attrs.url)) {
-             return 'the URL doesn\'t be empty.';
-           }
-         }
-       });
-
+       debugger;
        var urlModel = new UrlModel();
 
-       var UrlView = Backbone.View.extend({
-         events: {
-           'keyup': 'changeText'
-         },
-         initialize: function (options) {
-           var __this = this;
-           this.el = options.el;
-           this.model.on("validated:invalid", function(model, error) {
-             debugger;
-             __this.$el.addClass('error');
-           });
-           this.model.on("invalid", function(model, error) {
-             debugger;
-             __this.$el.addClass('error');
-           });
-           
-           this.listenTo(this.model, "change", _.debounce(function () {
-console.log('jopa');
-             if (this.model.isValid()) {
-               __this.$el.removeClass('error');
-             }
-           }, 200));
-debugger;
-//           Backbone.Validation.bind(this);
-         },
-         changeText: function (e) {
-           debugger;
-
-           this.model.set('url', $(e.target).val());
-         },
-         template: template,
-         remove: function() {
-           // Remove the validation binding
-           // See: http://thedersen.com/projects/backbone-validation/#using-form-model-validation/unbinding
-           Backbone.Validation.unbind(this);
-           return Backbone.View.prototype.remove.apply(this, arguments);
-         }
-//         render: function() {
-  //         this.$el.val(this.template(this.model.attributes));
-    //       return this;
-      //   }
-
-       });
-debugger;
-       var url = new UrlView({
+       var url = new UrlModelView({
          model: urlModel,
          el: $el
        });
